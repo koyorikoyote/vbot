@@ -64,8 +64,8 @@ Text, audio binary, and avatar command broadcasting
 
 ## Verification
 
-- ✅ `go build ./...` — compiles with zero errors
-- ✅ `go vet ./...` — passes with zero warnings
+- `go build ./...` — compiles with zero errors
+- `go vet ./...` — passes with zero warnings
 
 ## How to Run
 
