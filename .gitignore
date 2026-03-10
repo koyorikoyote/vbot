@@ -1,0 +1,27 @@
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary folders
+tmp/
+temp/
+tests/
+/tests/
+/__tests__/
+/test-reports/
+test-*
+
+*.zip
+*.rar
+downloads/
+uploads/*
