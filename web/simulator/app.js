@@ -5,7 +5,8 @@ let ws = null;
 let audioCtx = null;
 let analyser = null;
 let gainNode = null;
-let sessionId = `session_${Date.now()}`;
+let sessionBase = `session_${Date.now()}`;
+let sessionId = `${sessionBase}_en`;
 
 // DOM elements
 const connectBtn = document.getElementById("connect-btn");
@@ -25,6 +26,14 @@ const ttsBackend = document.getElementById("tts-backend");
 const volumeSlider = document.getElementById("volume-slider");
 const volumeValue = document.getElementById("volume-value");
 const langSelect = document.getElementById("lang-select");
+
+// Language switch: reset session so LLM gets a clean context for the new language
+langSelect.addEventListener("change", () => {
+  sessionId = `${sessionBase}_${langSelect.value}`;
+  const messages = document.getElementById("messages");
+  messages.innerHTML = "";
+  addMessage("system", `Language switched to ${langSelect.value === "ja" ? "Japanese" : "English"}`);
+});
 
 // Volume control
 volumeSlider.addEventListener("input", () => {

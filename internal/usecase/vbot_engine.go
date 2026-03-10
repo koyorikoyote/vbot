@@ -221,6 +221,12 @@ func buildSystemPrompt(traits []domain.PersonalityTrait, lang string) string {
 	sb.WriteString("- React to chat with appropriate emotion\n")
 	sb.WriteString("- Never use emojis or internet slang\n")
 
+	if lang == "ja" {
+		sb.WriteString("\nCRITICAL RULE: You MUST speak ONLY in Japanese. Translate ALL English names, terms, or phrases into Katakana (e.g., 'V-Bot' -> 'ブイボット'). Absolutely NO English letters (A-Z) or words allowed in your final response.\n")
+	} else {
+		sb.WriteString("\nCRITICAL RULE: You MUST speak ONLY in English.\n")
+	}
+
 	return sb.String()
 }
 
