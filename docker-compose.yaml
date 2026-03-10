@@ -1,0 +1,28 @@
+services:
+  redis-stack:
+    image: redis/redis-stack-server:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  piper-tts:
+    image: ghcr.io/arunk140/serve-piper-tts:latest
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data/tts-models:/models
+    restart: unless-stopped
+
+  whisper-server:
+    image: ghcr.io/ggerganov/whisper.cpp:main
+    command: ["--model", "/models/ggml-medium.bin", "--host", "0.0.0.0", "--port", "9000"]
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./data/whisper-models:/models
+    restart: unless-stopped
+
+volumes:
+  redis-data:

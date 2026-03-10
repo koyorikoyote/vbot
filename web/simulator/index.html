@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VBot Simulator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>VBot Simulator</h1>
+        <div id="status">
+          <span id="ws-status" class="status-dot offline"></span>
+          <span id="ws-label">Disconnected</span>
+        </div>
+      </header>
+
+      <main>
+        <section id="avatar-section">
+          <div id="avatar-container">
+            <canvas id="avatar-canvas" width="400" height="400"></canvas>
+            <div id="emotion-label">neutral</div>
+          </div>
+          <div id="avatar-controls">
+            <button id="connect-btn">Connect</button>
+            <span id="tts-backend">TTS: --</span>
+          </div>
+        </section>
+
+        <section id="chat-section">
+          <div id="messages"></div>
+          <form id="chat-form">
+            <input
+              type="text"
+              id="chat-input"
+              placeholder="Type a message..."
+              autocomplete="off"
+            />
+            <button type="submit">Send</button>
+          </form>
+        </section>
+
+        <section id="ingest-section">
+          <h3>Stream Ingestion</h3>
+          <form id="upload-form">
+            <input type="file" id="file-input" accept="video/*,audio/*" />
+            <button type="submit">Upload &amp; Ingest</button>
+          </form>
+          <div id="job-status"></div>
+          <div id="completeness"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
