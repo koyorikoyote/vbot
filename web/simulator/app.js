@@ -4,6 +4,7 @@ const WS_URL = `ws://${window.location.host}/ws`;
 let ws = null;
 let audioCtx = null;
 let analyser = null;
+let gainNode = null;
 let sessionId = `session_${Date.now()}`;
 
 // DOM elements
@@ -21,6 +22,17 @@ const emotionLabel = document.getElementById("emotion-label");
 const canvas = document.getElementById("avatar-canvas");
 const ctx = canvas.getContext("2d");
 const ttsBackend = document.getElementById("tts-backend");
+const volumeSlider = document.getElementById("volume-slider");
+const volumeValue = document.getElementById("volume-value");
+
+// Volume control
+volumeSlider.addEventListener("input", () => {
+  const vol = parseInt(volumeSlider.value, 10);
+  volumeValue.textContent = `${vol}%`;
+  if (gainNode) {
+    gainNode.gain.value = vol / 100;
+  }
+});
 
 // Avatar state
 let avatarState = "idle";
@@ -135,7 +147,10 @@ function playAudio(arrayBuffer) {
     audioCtx = new AudioContext();
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 256;
-    analyser.connect(audioCtx.destination);
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = parseInt(volumeSlider.value, 10) / 100;
+    analyser.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
   }
 
   audioCtx.decodeAudioData(arrayBuffer.slice(0), (buffer) => {

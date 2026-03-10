@@ -128,6 +128,26 @@ main {
   color: #888;
 }
 
+#volume-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+#volume-slider {
+  width: 80px;
+  accent-color: #a855f7;
+  cursor: pointer;
+}
+
+#volume-value {
+  width: 32px;
+  text-align: right;
+  font-size: 0.75rem;
+}
+
 /* Chat */
 #chat-section {
   display: flex;

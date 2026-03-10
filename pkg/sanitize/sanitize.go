@@ -28,12 +28,12 @@ func Text(input string) string {
 	return s
 }
 
-// LLMOutput sanitizes LLM-generated text, removing potential
-// prompt injection patterns and HTML.
+// LLMOutput sanitizes LLM-generated text, removing control
+// characters. Does not HTML-escape since output is returned
+// via JSON API (frontend uses textContent for XSS safety).
 func LLMOutput(input string) string {
 	s := controlCharRe.ReplaceAllString(input, "")
 	s = strings.TrimSpace(s)
-	s = html.EscapeString(s)
 	return s
 }
 
