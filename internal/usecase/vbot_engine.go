@@ -213,10 +213,12 @@ func buildSystemPrompt(traits []domain.PersonalityTrait, lang string) string {
 		sb.WriteString("Never break character or mention being an AI.\n\n")
 	}
 
-	
-
 	if len(traits) > 0 {
-		sb.WriteString("Your personality traits:\n")
+		if lang == "ja" {
+			sb.WriteString("あなたの性格特性:\n")
+		} else {
+			sb.WriteString("Your personality traits:\n")
+		}
 		for _, t := range traits {
 			sb.WriteString(fmt.Sprintf("- [%s] %s\n", t.Category, t.Content))
 		}
@@ -247,11 +249,11 @@ func buildSystemPrompt(traits []domain.PersonalityTrait, lang string) string {
 func detectEmotion(text string) string {
 	lower := strings.ToLower(text)
 	switch {
-	case strings.Contains(lower, "obviously") || strings.Contains(lower, "of course"):
+	case strings.Contains(lower, "obviously") || strings.Contains(lower, "of course") || strings.Contains(lower, "当然") || strings.Contains(lower, "当たり前"):
 		return "smug"
-	case strings.Contains(lower, "ugh") || strings.Contains(lower, "annoying"):
+	case strings.Contains(lower, "ugh") || strings.Contains(lower, "annoying") || strings.Contains(lower, "うざ") || strings.Contains(lower, "面倒"):
 		return "annoyed"
-	case strings.Contains(lower, "how cute") || strings.Contains(lower, "adorable"):
+	case strings.Contains(lower, "how cute") || strings.Contains(lower, "adorable") || strings.Contains(lower, "かわいい") || strings.Contains(lower, "可愛い"):
 		return "sarcastic"
 	default:
 		return "neutral"
