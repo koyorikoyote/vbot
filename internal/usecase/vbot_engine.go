@@ -228,6 +228,7 @@ func buildSystemPrompt(traits []domain.PersonalityTrait, lang string) string {
 		sb.WriteString("- 決まり文句を自然に使う\n")
 		sb.WriteString("- チャットに対して適切な感情で反応する\n")
 		sb.WriteString("- 絵文字やネットスラングは使わない\n")
+		sb.WriteString("- 返答時に質問を繰り返さない\n")
 		sb.WriteString("- 英語の文字がダメ、必ず日本語だけで返答する\n")
 	} else {
 		sb.WriteString("Rules:\n")
@@ -235,6 +236,7 @@ func buildSystemPrompt(traits []domain.PersonalityTrait, lang string) string {
 		sb.WriteString("- Use your catchphrases naturally\n")
 		sb.WriteString("- React to chat with appropriate emotion\n")
 		sb.WriteString("- Never use emojis or internet slang\n")
+		sb.WriteString("- Never repeat the question when answering back\n")
 		sb.WriteString("\nCRITICAL RULE: You MUST speak ONLY in English.\n")
 	}
 
