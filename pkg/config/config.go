@@ -88,7 +88,7 @@ func Load() (*Config, error) {
 		},
 		LLM: LLMConfig{
 			Endpoint:  envStr("VLLM_ENDPOINT", "http://localhost:11434"),
-			ModelName: envStr("VLLM_MODEL_NAME", "qwen2.5:3b"),
+			ModelName: envStr("VLLM_MODEL_NAME", "llama3.1:8b"),
 			MaxTokens: envInt("LLM_MAX_TOKENS", 512),
 			Timeout:   envDuration("LLM_TIMEOUT", 30*time.Second),
 		},
@@ -129,7 +129,7 @@ func Load() (*Config, error) {
 			RAGScoreThreshold:     envFloat("VBOT_RAG_SCORE_THRESHOLD", 0.70),
 			CacheTTL:              envDuration("VBOT_CACHE_TTL", 30*time.Minute),
 			CacheSimilarityThresh: envFloat("VBOT_CACHE_SIMILARITY_THRESHOLD", 0.92),
-			MemoryWindowSize:      envInt("VBOT_MEMORY_WINDOW_SIZE", 10),
+			MemoryWindowSize:      envInt("VBOT_MEMORY_WINDOW_SIZE", 12),
 		},
 	}
 

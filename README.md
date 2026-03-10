@@ -76,7 +76,7 @@ docker compose up -d
 
 # 2. Pull LLM + embedding models
 
-ollama pull qwen2.5:3b
+ollama pull llama3.1:8b
 ollama pull nomic-embed-text
 
 # 3. Copy env
