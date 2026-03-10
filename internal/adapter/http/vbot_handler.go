@@ -34,6 +34,7 @@ type chatRequest struct {
 	SessionID    string `json:"session_id" binding:"required"`
 	Input        string `json:"input" binding:"required"`
 	IncludeAudio bool   `json:"include_audio"`
+	Language     string `json:"language"`
 }
 
 type chatResponse struct {
@@ -57,6 +58,7 @@ func (h *VBotHandler) Chat(c *gin.Context) {
 		SessionID:    req.SessionID,
 		Input:        req.Input,
 		IncludeAudio: req.IncludeAudio,
+		Language:     req.Language,
 	})
 	if err != nil {
 		h.logger.Error("chat failed", zap.Error(err))

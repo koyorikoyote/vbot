@@ -33,7 +33,7 @@ func NewPiperClient(endpoint string, timeout time.Duration, logger *zap.Logger) 
 }
 
 // Synthesize converts text to WAV audio using Piper TTS.
-func (c *PiperClient) Synthesize(ctx context.Context, text string) ([]byte, string, error) {
+func (c *PiperClient) Synthesize(ctx context.Context, text string, lang string) ([]byte, string, error) {
 	synthURL := fmt.Sprintf("%s/api/tts?text=%s", c.endpoint, url.QueryEscape(text))
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, synthURL, nil)

@@ -25,15 +25,15 @@ func NewTTSChain(primary *PiperClient, fallback *SAPIClient, forceSAPI bool, log
 }
 
 // Synthesize tries Piper first, falls back to Windows SAPI.
-func (c *TTSChain) Synthesize(ctx context.Context, text string) ([]byte, string, error) {
+func (c *TTSChain) Synthesize(ctx context.Context, text string, lang string) ([]byte, string, error) {
 	if c.useSAPI {
-		c.logger.Debug("using sapi (forced)")
-		return c.fallback.Synthesize(ctx, text)
+		c.logger.Debug("using sapi (forced)", zap.String("lang", lang))
+		return c.fallback.Synthesize(ctx, text, lang)
 	}
 
 	// Try Piper first
 	if err := c.primary.HealthCheck(ctx); err == nil {
-		audio, format, err := c.primary.Synthesize(ctx, text)
+		audio, format, err := c.primary.Synthesize(ctx, text, lang)
 		if err == nil {
 			return audio, format, nil
 		}
@@ -42,7 +42,7 @@ func (c *TTSChain) Synthesize(ctx context.Context, text string) ([]byte, string,
 		c.logger.Debug("piper unavailable, using sapi fallback", zap.Error(err))
 	}
 
-	return c.fallback.Synthesize(ctx, text)
+	return c.fallback.Synthesize(ctx, text, lang)
 }
 
 // HealthCheck checks if any TTS backend is available.

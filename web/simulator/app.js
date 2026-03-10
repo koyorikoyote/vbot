@@ -24,6 +24,7 @@ const ctx = canvas.getContext("2d");
 const ttsBackend = document.getElementById("tts-backend");
 const volumeSlider = document.getElementById("volume-slider");
 const volumeValue = document.getElementById("volume-value");
+const langSelect = document.getElementById("lang-select");
 
 // Volume control
 volumeSlider.addEventListener("input", () => {
@@ -102,6 +103,7 @@ chatForm.addEventListener("submit", async (e) => {
         session_id: sessionId,
         input: input,
         include_audio: true,
+        language: langSelect.value,
       }),
     });
     const data = await resp.json();

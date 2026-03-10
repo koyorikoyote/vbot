@@ -60,7 +60,7 @@ type SemanticCacheRepository interface {
 
 // TTSClient synthesizes text into audio.
 type TTSClient interface {
-	Synthesize(ctx context.Context, text string) (audioBytes []byte, format string, err error)
+	Synthesize(ctx context.Context, text string, lang string) (audioBytes []byte, format string, err error)
 	HealthCheck(ctx context.Context) error
 }
 

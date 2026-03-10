@@ -143,10 +143,22 @@ main {
 }
 
 #volume-value {
-  width: 32px;
-  text-align: right;
-  font-size: 0.75rem;
+    width: 32px;
+    text-align: right;
+    font-size: 0.75rem;
 }
+
+#lang-select {
+    padding: 4px 8px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a4e;
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-size: 0.8rem;
+    cursor: pointer;
+    outline: none;
+}
+#lang-select:focus { border-color: #a855f7; }
 
 /* Chat */
 #chat-section {

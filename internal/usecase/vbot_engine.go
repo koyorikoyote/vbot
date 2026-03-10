@@ -73,6 +73,7 @@ type ChatRequest struct {
 	SessionID    string `json:"session_id"`
 	Input        string `json:"input"`
 	IncludeAudio bool   `json:"include_audio"`
+	Language     string `json:"language"` // "en" or "ja"
 }
 
 // Chat processes a user message through the full pipeline.
@@ -106,7 +107,7 @@ func (e *VBotEngine) Chat(ctx context.Context, req ChatRequest) (*domain.VBotRes
 		}
 
 		if req.IncludeAudio {
-			if audio, format, err := e.tts.Synthesize(ctx, cachedResp); err == nil {
+			if audio, format, err := e.tts.Synthesize(ctx, cachedResp, req.Language); err == nil {
 				response.AudioBytes = audio
 				response.AudioFormat = format
 			}
@@ -131,7 +132,7 @@ func (e *VBotEngine) Chat(ctx context.Context, req ChatRequest) (*domain.VBotRes
 	}
 
 	// Build system prompt
-	systemPrompt := buildSystemPrompt(traits)
+	systemPrompt := buildSystemPrompt(traits, req.Language)
 
 	// Build messages
 	messages := make([]domain.ConversationTurn, 0, len(recentTurns)+1)
@@ -173,7 +174,7 @@ func (e *VBotEngine) Chat(ctx context.Context, req ChatRequest) (*domain.VBotRes
 	// Synthesize audio if requested
 	if req.IncludeAudio {
 		ttsStart := time.Now()
-		audio, format, err := e.tts.Synthesize(ctx, llmResponse)
+		audio, format, err := e.tts.Synthesize(ctx, llmResponse, req.Language)
 		if err != nil {
 			e.logger.Warn("tts synthesis failed", zap.Error(err))
 		} else {
@@ -189,7 +190,7 @@ func (e *VBotEngine) Chat(ctx context.Context, req ChatRequest) (*domain.VBotRes
 	return response, nil
 }
 
-func buildSystemPrompt(traits []domain.PersonalityTrait) string {
+func buildSystemPrompt(traits []domain.PersonalityTrait, lang string) string {
 	var sb strings.Builder
 	sb.WriteString("You are V-Bot, a sarcastic and bratty AI personality. ")
 	sb.WriteString("Stay in character at all times. Be witty, condescending, and entertaining. ")
@@ -198,6 +199,11 @@ func buildSystemPrompt(traits []domain.PersonalityTrait) string {
 	sb.WriteString("Never repeat what the user said. Always answer with a natural first-person response. ")
 	sb.WriteString("Lie when it comes to personal questions about yourself. Do not offer assistance. ")
 	sb.WriteString("Never break character or mention being an AI.\n\n")
+
+	if lang == "ja" {
+		sb.WriteString("IMPORTANT: You MUST respond entirely in natural Japanese. Use casual Japanese speech patterns. ")
+		sb.WriteString("Use appropriate Japanese expressions and slang. Do not mix English into your responses.\n\n")
+	}
 
 	if len(traits) > 0 {
 		sb.WriteString("Your personality traits:\n")
