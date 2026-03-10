@@ -85,11 +85,11 @@ cp .env.example .env
 
 # 4. Run
 
-go run cmd/vbot/main.go
+go build -o vbot.exe ./cmd/vbot; ./vbot.exe
 
 # 5. Open simulator
 
-# http://localhost:8090/simulator/
+http://localhost:8090/simulator/
 
 ## API Endpoints
 

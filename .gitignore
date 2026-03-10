@@ -23,5 +23,6 @@ test-*
 
 *.zip
 *.rar
+*.exe
 downloads/
 uploads/*
