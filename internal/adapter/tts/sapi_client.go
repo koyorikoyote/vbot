@@ -2,6 +2,7 @@ package tts
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"os/exec"
@@ -38,6 +39,8 @@ func (c *SAPIClient) Synthesize(ctx context.Context, text string, lang string) (
 		voicePattern = "'Haruka' -or $desc -match 'Sayaka' -or $desc -match 'Nanami' -or $desc -match 'Ayumi'"
 	}
 
+	b64Text := base64.StdEncoding.EncodeToString([]byte(text))
+
 	script := fmt.Sprintf(`
 $sp = New-Object -ComObject SAPI.SpVoice
 $voices = $sp.GetVoices()
@@ -51,15 +54,19 @@ for ($i = 0; $i -lt $voices.Count; $i++) {
     }
 }
 if ($targetVoice) { $sp.Voice = $targetVoice }
+
+$textBytes = [System.Convert]::FromBase64String('%s')
+$speakText = [System.Text.Encoding]::UTF8.GetString($textBytes)
+
 $stream = New-Object -ComObject SAPI.SpFileStream
 $format = New-Object -ComObject SAPI.SpAudioFormat
 $format.Type = 22
 $stream.Format = $format
 $stream.Open('%s', 3)
 $sp.AudioOutputStream = $stream
-$sp.Speak('%s')
+$sp.Speak($speakText)
 $stream.Close()
-`, voicePattern, outputPath, escapePowerShell(text))
+`, voicePattern, b64Text, outputPath)
 
 	cmd := exec.CommandContext(ctx, "powershell", "-NoProfile", "-Command", script)
 	output, err := cmd.CombinedOutput()
@@ -89,14 +96,4 @@ func (c *SAPIClient) HealthCheck(ctx context.Context) error {
 	return nil
 }
 
-func escapePowerShell(s string) string {
-	result := ""
-	for _, c := range s {
-		if c == '\'' {
-			result += "''"
-		} else {
-			result += string(c)
-		}
-	}
-	return result
-}
+
