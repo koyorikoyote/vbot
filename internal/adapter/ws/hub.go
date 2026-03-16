@@ -76,6 +76,28 @@ func (h *Hub) BroadcastText(_ context.Context, response domain.VBotResponse) err
 	return nil
 }
 
+// BroadcastTextChunk sends a raw string chunk to all connected clients.
+func (h *Hub) BroadcastTextChunk(_ context.Context, chunk string) error {
+	msg := wsMessage{
+		Type:    "text_chunk",
+		Payload: chunk,
+	}
+	data, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	for client := range h.clients {
+		select {
+		case client.send <- data:
+		default:
+		}
+	}
+	return nil
+}
+
 // BroadcastAudio sends binary audio data to all connected clients.
 func (h *Hub) BroadcastAudio(_ context.Context, audioBytes []byte, format string) error {
 	h.mu.RLock()

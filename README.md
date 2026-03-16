@@ -67,6 +67,10 @@ Text, audio binary, and avatar command broadcasting
 - `go build ./...` — compiles with zero errors
 - `go vet ./...` — passes with zero warnings
 
+## Install Whisper Model
+
+curl.exe -L -o data/whisper-models/ggml-medium.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin
+
 ## How to Run
 
 # 1. Start dependencies

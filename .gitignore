@@ -26,3 +26,4 @@ test-*
 *.exe
 downloads/
 uploads/*
+data/whisper-models/*

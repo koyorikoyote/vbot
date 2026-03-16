@@ -145,10 +145,29 @@ func (e *VBotEngine) Chat(ctx context.Context, req ChatRequest) (*domain.VBotRes
 
 	// Call LLM
 	llmStart := time.Now()
-	llmResponse, err := e.llm.Chat(ctx, messages, systemPrompt)
-	if err != nil {
-		return nil, fmt.Errorf("llm chat: %w", err)
+	outCh, errCh := e.llm.ChatStream(ctx, messages, systemPrompt)
+	
+	var sb strings.Builder
+	for {
+		select {
+		case chunk, ok := <-outCh:
+			if !ok {
+				outCh = nil
+			} else {
+				sb.WriteString(chunk)
+				_ = e.broadcaster.BroadcastTextChunk(ctx, chunk)
+			}
+		case err := <-errCh:
+			if err != nil {
+				return nil, fmt.Errorf("llm chat stream: %w", err)
+			}
+			errCh = nil
+		}
+		if outCh == nil && errCh == nil {
+			break
+		}
 	}
+	llmResponse := sb.String()
 	latency.LLMInferenceMs = time.Since(llmStart).Milliseconds()
 
 	// Sanitize LLM output

@@ -2,7 +2,7 @@ services:
   redis-stack:
     image: redis/redis-stack-server:latest
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis-data:/data
     restart: unless-stopped
@@ -17,6 +17,7 @@ services:
 
   whisper-server:
     image: ghcr.io/ggerganov/whisper.cpp:main
+    entrypoint: ["/app/build/bin/whisper-server"]
     command: ["--model", "/models/ggml-medium.bin", "--host", "0.0.0.0", "--port", "9000"]
     ports:
       - "9000:9000"

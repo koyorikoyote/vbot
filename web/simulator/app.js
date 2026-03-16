@@ -79,6 +79,8 @@ function connectWebSocket() {
     connectBtn.textContent = "Connect";
   };
 
+let streamingMessageDiv = null;
+
   ws.onmessage = (event) => {
     if (event.data instanceof ArrayBuffer) {
       playAudio(event.data);
@@ -86,7 +88,19 @@ function connectWebSocket() {
     }
     const msg = JSON.parse(event.data);
     if (msg.type === "text") {
-      // Already handled via chat API response
+      // Final message handled via chat API response, clear the streaming container
+      if (streamingMessageDiv) {
+        streamingMessageDiv.remove();
+        streamingMessageDiv = null;
+      }
+    } else if (msg.type === "text_chunk") {
+      if (!streamingMessageDiv) {
+        streamingMessageDiv = document.createElement("div");
+        streamingMessageDiv.className = `message assistant streaming`;
+        messages.appendChild(streamingMessageDiv);
+      }
+      streamingMessageDiv.textContent += msg.payload;
+      messages.scrollTop = messages.scrollHeight;
     } else if (msg.type === "avatar_command") {
       avatarState = msg.payload.state;
       avatarEmotion = msg.payload.emotion || "neutral";

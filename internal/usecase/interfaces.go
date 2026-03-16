@@ -10,6 +10,7 @@ import (
 // LLMClient handles chat-style LLM inference.
 type LLMClient interface {
 	Chat(ctx context.Context, messages []domain.ConversationTurn, systemPrompt string) (string, error)
+	ChatStream(ctx context.Context, messages []domain.ConversationTurn, systemPrompt string) (<-chan string, <-chan error)
 }
 
 // EmbeddingClient generates vector embeddings from text.
@@ -67,6 +68,7 @@ type TTSClient interface {
 // HUDBroadcaster sends responses to connected WebSocket clients.
 type HUDBroadcaster interface {
 	BroadcastText(ctx context.Context, response domain.VBotResponse) error
+	BroadcastTextChunk(ctx context.Context, chunk string) error
 	BroadcastAudio(ctx context.Context, audioBytes []byte, format string) error
 	BroadcastAvatarCommand(ctx context.Context, cmd domain.AvatarCommand) error
 }

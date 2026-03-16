@@ -90,7 +90,7 @@ func Load() (*Config, error) {
 			Endpoint:  envStr("VLLM_ENDPOINT", "http://localhost:11434"),
 			ModelName: envStr("VLLM_MODEL_NAME", "llama3.1:8b"),
 			MaxTokens: envInt("LLM_MAX_TOKENS", 512),
-			Timeout:   envDuration("LLM_TIMEOUT", 30*time.Second),
+			Timeout:   envDuration("LLM_TIMEOUT", 120*time.Second),
 		},
 		Embedding: EmbeddingConfig{
 			Endpoint:  envStr("EMBEDDING_ENDPOINT", "http://localhost:11434"),
@@ -99,7 +99,7 @@ func Load() (*Config, error) {
 			Timeout:   envDuration("EMBEDDING_TIMEOUT", 10*time.Second),
 		},
 		Redis: RedisConfig{
-			URL:      envStr("REDIS_URL", "localhost:6379"),
+			URL:      envStr("REDIS_URL", "localhost:6380"),
 			Password: envStr("REDIS_PASSWORD", ""),
 			DB:       envInt("REDIS_DB", 0),
 		},
@@ -129,7 +129,7 @@ func Load() (*Config, error) {
 			RAGScoreThreshold:     envFloat("VBOT_RAG_SCORE_THRESHOLD", 0.70),
 			CacheTTL:              envDuration("VBOT_CACHE_TTL", 30*time.Minute),
 			CacheSimilarityThresh: envFloat("VBOT_CACHE_SIMILARITY_THRESHOLD", 0.92),
-			MemoryWindowSize:      envInt("VBOT_MEMORY_WINDOW_SIZE", 12),
+			MemoryWindowSize:      envInt("VBOT_MEMORY_WINDOW_SIZE", 5),
 		},
 	}
 
