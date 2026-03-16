@@ -22,14 +22,16 @@ type OllamaClient struct {
 	maxTokens  int
 	httpClient *http.Client
 	logger     *zap.Logger
+	numThreads int
 }
 
 // NewOllamaClient creates a new LLM client.
-func NewOllamaClient(endpoint, model string, maxTokens int, timeout time.Duration, logger *zap.Logger) *OllamaClient {
+func NewOllamaClient(endpoint, model string, maxTokens int, timeout time.Duration, numThreads int, logger *zap.Logger) *OllamaClient {
 	return &OllamaClient{
-		endpoint:  endpoint,
-		model:     model,
-		maxTokens: maxTokens,
+		endpoint:   endpoint,
+		model:      model,
+		maxTokens:  maxTokens,
+		numThreads: numThreads,
 		httpClient: &http.Client{
 			Timeout: timeout,
 		},
@@ -52,6 +54,7 @@ type chatMessage struct {
 type chatOptions struct {
 	NumPredict int `json:"num_predict,omitempty"`
 	NumCtx     int `json:"num_ctx,omitempty"`
+	NumThread  int `json:"num_thread,omitempty"`
 }
 
 type chatResponse struct {
@@ -76,6 +79,7 @@ func (c *OllamaClient) Chat(ctx context.Context, messages []domain.ConversationT
 		Stream:   false,
 		Options: chatOptions{
 			NumPredict: c.maxTokens,
+			NumThread:  c.numThreads,
 		},
 	}
 
@@ -139,6 +143,7 @@ func (c *OllamaClient) ChatStream(ctx context.Context, messages []domain.Convers
 			Options: chatOptions{
 				NumPredict: c.maxTokens,
 				NumCtx:     1024,
+				NumThread:  c.numThreads,
 			},
 		}
 
@@ -199,4 +204,38 @@ func (c *OllamaClient) ChatStream(ctx context.Context, messages []domain.Convers
 	}()
 
 	return outCh, errCh
+}
+// Warmup sends an empty request to Ollama's generate API to ensure the model is loaded in memory.
+func (c *OllamaClient) Warmup(ctx context.Context) error {
+	reqBody := map[string]interface{}{
+		"model":  c.model,
+		"prompt": "",
+	}
+
+	bodyBytes, err := json.Marshal(reqBody)
+	if err != nil {
+		return fmt.Errorf("marshal warmup request: %w", err)
+	}
+
+	url := fmt.Sprintf("%s/api/generate", c.endpoint)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(bodyBytes))
+	if err != nil {
+		return fmt.Errorf("create warmup request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	c.logger.Info("warming up llm model", zap.String("model", c.model))
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("llm warmup failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		b, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("llm warmup status %d: %s", resp.StatusCode, string(b))
+	}
+
+	c.logger.Info("llm model warmed up", zap.String("model", c.model))
+	return nil
 }

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,7 @@ type Router struct {
 	vbotHandler  *VBotHandler
 	ingestHandler *IngestHandler
 	hub          *ws.Hub
+	ctx          context.Context
 	logger       *zap.Logger
 }
 
@@ -29,6 +31,7 @@ func NewRouter(
 	hub *ws.Hub,
 	uploadDir string,
 	maxFileSizeMB int,
+	ctx context.Context,
 	logger *zap.Logger,
 ) *Router {
 	gin.SetMode(gin.ReleaseMode)
@@ -43,6 +46,7 @@ func NewRouter(
 		vbotHandler:   vbotHandler,
 		ingestHandler: ingestHandler,
 		hub:           hub,
+		ctx:           ctx,
 		logger:        logger,
 	}
 
@@ -91,6 +95,10 @@ func (r *Router) wsHandler(c *gin.Context) {
 
 	client := ws.NewClient(r.hub, conn)
 	r.hub.Register(client)
+
+	// Trigger model warmup on connect to reduce first-message latency.
+	// Use application context instead of request context to avoid premature cancellation.
+	r.vbotHandler.engine.Warmup(r.ctx)
 
 	go client.WritePump()
 	go client.ReadPump()

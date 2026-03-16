@@ -85,3 +85,37 @@ func (c *EmbeddingClient) Embed(ctx context.Context, text string) ([]float32, er
 	c.logger.Debug("embedding generated", zap.Int("dimension", len(embedResp.Embeddings[0])))
 	return embedResp.Embeddings[0], nil
 }
+// Warmup sends an empty request to Ollama to ensure the embedding model is loaded in memory.
+func (c *EmbeddingClient) Warmup(ctx context.Context) error {
+	reqBody := embedRequest{
+		Model: c.model,
+		Input: "",
+	}
+
+	bodyBytes, err := json.Marshal(reqBody)
+	if err != nil {
+		return fmt.Errorf("marshal embedding warmup request: %w", err)
+	}
+
+	url := fmt.Sprintf("%s/api/embed", c.endpoint)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(bodyBytes))
+	if err != nil {
+		return fmt.Errorf("create embedding warmup request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	c.logger.Info("warming up embedding model", zap.String("model", c.model))
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("embedding warmup failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		b, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("embedding warmup status %d: %s", resp.StatusCode, string(b))
+	}
+
+	c.logger.Info("embedding model warmed up", zap.String("model", c.model))
+	return nil
+}

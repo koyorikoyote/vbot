@@ -28,9 +28,10 @@ type ServerConfig struct {
 type LLMConfig struct {
 	Endpoint   string
 	ModelName  string
-	MaxTokens  int
+	NumTokens  int
 	Timeout    time.Duration
 	SystemRole string
+	NumThreads int
 }
 
 type EmbeddingConfig struct {
@@ -87,16 +88,17 @@ func Load() (*Config, error) {
 			WriteTimeout: envDuration("SERVER_WRITE_TIMEOUT", 60*time.Second),
 		},
 		LLM: LLMConfig{
-			Endpoint:  envStr("VLLM_ENDPOINT", "http://localhost:11434"),
-			ModelName: envStr("VLLM_MODEL_NAME", "llama3.1:8b"),
-			MaxTokens: envInt("LLM_MAX_TOKENS", 512),
-			Timeout:   envDuration("LLM_TIMEOUT", 120*time.Second),
+			Endpoint:   envStr("VLLM_ENDPOINT", "http://localhost:11434"),
+			ModelName:  envStr("VLLM_MODEL_NAME", "llama3.2:1b"),
+			NumTokens:  envInt("LLM_MAX_TOKENS", 512),
+			Timeout:    envDuration("LLM_TIMEOUT", 120*time.Second),
+			NumThreads: envInt("LLM_NUM_THREADS", 0),
 		},
 		Embedding: EmbeddingConfig{
 			Endpoint:  envStr("EMBEDDING_ENDPOINT", "http://localhost:11434"),
 			ModelName: envStr("EMBEDDING_MODEL_NAME", "nomic-embed-text"),
 			Dimension: envInt("EMBEDDING_DIMENSION", 768),
-			Timeout:   envDuration("EMBEDDING_TIMEOUT", 10*time.Second),
+			Timeout:   envDuration("EMBEDDING_TIMEOUT", 60*time.Second),
 		},
 		Redis: RedisConfig{
 			URL:      envStr("REDIS_URL", "localhost:6380"),

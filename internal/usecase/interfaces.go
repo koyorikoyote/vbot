@@ -11,11 +11,13 @@ import (
 type LLMClient interface {
 	Chat(ctx context.Context, messages []domain.ConversationTurn, systemPrompt string) (string, error)
 	ChatStream(ctx context.Context, messages []domain.ConversationTurn, systemPrompt string) (<-chan string, <-chan error)
+	Warmup(ctx context.Context) error
 }
 
 // EmbeddingClient generates vector embeddings from text.
 type EmbeddingClient interface {
 	Embed(ctx context.Context, text string) ([]float32, error)
+	Warmup(ctx context.Context) error
 }
 
 // STTClient transcribes an audio file to text segments.
@@ -43,6 +45,7 @@ type RAGRepository interface {
 	LoadFromFile(ctx context.Context, filePath string) error
 	GetCompleteness(ctx context.Context) (*domain.RAGCompleteness, error)
 	AllTraits(ctx context.Context) ([]domain.PersonalityTrait, error)
+	Exists(ctx context.Context, traitID string) (bool, error)
 }
 
 // ConversationMemory manages chat history per session.

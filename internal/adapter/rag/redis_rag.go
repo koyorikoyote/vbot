@@ -260,6 +260,13 @@ func (r *RedisRAG) AllTraits(ctx context.Context) ([]domain.PersonalityTrait, er
 	return parseSearchResults(result, 0)
 }
 
+// Exists checks if a trait already exists in the repository.
+func (r *RedisRAG) Exists(ctx context.Context, traitID string) (bool, error) {
+	key := ragKeyPrefix + traitID
+	n, err := r.client.Exists(ctx, key).Result()
+	return n > 0, err
+}
+
 type personalityFile struct {
 	Traits []domain.PersonalityTrait `yaml:"traits"`
 }

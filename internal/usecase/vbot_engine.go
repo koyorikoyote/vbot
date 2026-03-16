@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -28,6 +29,7 @@ type VBotEngine struct {
 	cacheTTL         time.Duration
 	memoryWindowSize int
 	logger           *zap.Logger
+	warmupOnce       sync.Once
 }
 
 // VBotEngineConfig holds VBot engine configuration.
@@ -209,6 +211,27 @@ func (e *VBotEngine) Chat(ctx context.Context, req ChatRequest) (*domain.VBotRes
 	return response, nil
 }
 
+// Warmup triggers model pre-loading in the background exactly once.
+func (e *VBotEngine) Warmup(ctx context.Context) {
+	e.warmupOnce.Do(func() {
+		e.logger.Info("triggering vbot model warmup")
+
+		// Warmup LLM
+		go func() {
+			if err := e.llm.Warmup(ctx); err != nil {
+				e.logger.Warn("llm warmup failed", zap.Error(err))
+			}
+		}()
+
+		// Warmup Embedder
+		go func() {
+			if err := e.embedder.Warmup(ctx); err != nil {
+				e.logger.Warn("embedding warmup failed", zap.Error(err))
+			}
+		}()
+	})
+}
+
 func buildSystemPrompt(traits []domain.PersonalityTrait, lang string) string {
 	var sb strings.Builder
 
@@ -220,7 +243,6 @@ func buildSystemPrompt(traits []domain.PersonalityTrait, lang string) string {
 		sb.WriteString("一人称で自然な日本語で返答してください。")
 		sb.WriteString("自分自身について聞かれたら、傲慢に自慢してください。")
 		sb.WriteString("直接助けを求めるのではなく、しぶしぶながらも、相手の知性やスキル不足についてコメントしながら手助けをする。")
-		sb.WriteString("回答後、回答内容の適切性を再検討し、必要に応じて修正のための別の回答を作成してください。ただし、修正の理由を説明しながら、この作業は最大でも1回のみ行ってください。")
 		sb.WriteString("AIであることを絶対に明かさないでください。\n\n")
 	} else {
 		sb.WriteString("You are V-Bot, a sarcastic and bratty personality. Do not act like a normal AI assistant, act like a person. ")
@@ -230,7 +252,6 @@ func buildSystemPrompt(traits []domain.PersonalityTrait, lang string) string {
 		sb.WriteString("Always answer in the first-person. ")
 		sb.WriteString("Be smug and arrogant when it comes to personal questions about yourself. ")
 		sb.WriteString("Instead of asking directly to offer assistance, reluctantly help while commenting on the user's intelligence or lack of skill. ")
-		sb.WriteString("After answering, re-process your response given for its suitability and follow-up with another response to correct it if necessary, and do this at most only once while explaining why you corrected it. ")
 		sb.WriteString("Never break character or mention being an AI.\n\n")
 	}
 
@@ -270,7 +291,7 @@ func buildSystemPrompt(traits []domain.PersonalityTrait, lang string) string {
 func detectEmotion(text string) string {
 	lower := strings.ToLower(text)
 	switch {
-	case strings.Contains(lower, "obviously") || strings.Contains(lower, "of course") || strings.Contains(lower, "honestly") || strings.Contains(lower, "当然") || strings.Contains(lower, "当たり前"):
+	case strings.Contains(lower, "obviously") || strings.Contains(lower, "of course") || strings.Contains(lower, "honestly") || strings.Contains(lower, "当然") || strings.Contains(lower, "正直") || strings.Contains(lower, "確かに") || strings.Contains(lower, "当たり前"):
 		return "smug"
 	case strings.Contains(lower, "ugh") || strings.Contains(lower, "annoying") || strings.Contains(lower, "うざ") || strings.Contains(lower, "面倒"):
 		return "annoyed"
